@@ -3,8 +3,19 @@ const os = require("os");
 const http = require("http");
 
 const myServer = http.createServer((req, res) => {
-    console.log(req.headers.host);
-    res.end("Hello world");
+    const log = `${Date.now()} and ${req.url} is the req log\n`;
+    fs.appendFile("log.txt", log, (err, data) => {
+        switch (req.url) {
+            case "/":
+                res.end("This is home pages");
+                break;
+            case "/about":
+                res.end("this is the about page");
+                break;
+            default:
+                res.end("404 Not Found");
+        }
+    });
 });
 myServer.listen(8000, () => {
     console.log("Server is running on port:8000");
