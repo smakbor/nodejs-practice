@@ -1,15 +1,32 @@
 const fs = require("fs");
+const http = require("http");
 const crypto = require("crypto");
 const express = require("express");
 const multer = require("multer");
+const path = require("path");
+const { Server } = require("socket.io");
 const data = require("./MOCK_DATA.json");
 
-const port = 8000;
 const app = express();
+const server = http.createServer(app);
+
+const port = 8000;
+
+app.use(express.static(path.resolve("./public")));
 // console.log(express);
 // console.log(crypto);
 
 // app.use(express.urlencoded({ extended: false }));
+
+//SOCKET.IO
+const io = new Server(server);
+io.on("connection", (socket) => {
+    // console.log("a user connected !", `id:${socket.id}`);
+    socket.on("message", (message) => {
+        io.emit("message", message);
+        console.log(message);
+    });
+});
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "./temp");
@@ -28,7 +45,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/", (req, res) => {
+app.use("/", (req, res) => {
+    res.sendFile("/public/index.html");
+});
+
+app.get("/test", (req, res) => {
     // res.json(data);
     res.end("hello world");
 });
@@ -51,6 +72,6 @@ app.get("/html", (req, res) => {
     });
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log("Server is running on Port:8000");
 });
